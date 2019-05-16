@@ -66,9 +66,17 @@ func run(c *cli.Context) (err error) {
 	defer f.Close()
 
 	ignoreUnfixed := c.Bool("ignore-unfixed")
-	result, err := scanner.ScanFile(f, severities, ignoreUnfixed)
+	vulns, err := scanner.ScanFile(f)
 	if err != nil {
 		return xerrors.Errorf("failed to scan a file: %w", err)
+	}
+
+	var results report.Results
+	for path, vuln := range vulns {
+		results = append(results, report.Result{
+			FileName:        path,
+			Vulnerabilities: vulnerability.FillAndFilter(vuln, severities, ignoreUnfixed),
+		})
 	}
 
 	var writer report.Writer
@@ -81,13 +89,13 @@ func run(c *cli.Context) (err error) {
 		return xerrors.New("unknown format")
 	}
 
-	if err = writer.Write([]report.Result{result}); err != nil {
+	if err = writer.Write(results); err != nil {
 		return xerrors.Errorf("failed to write results: %w", err)
 	}
 
 	exitCode := c.Int("exit-code")
 	if exitCode != 0 {
-		for _, result := range []report.Result{result} {
+		for _, result := range results {
 			if len(result.Vulnerabilities) > 0 {
 				os.Exit(exitCode)
 			}
