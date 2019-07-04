@@ -4,7 +4,7 @@ go 1.12
 
 require (
 	github.com/d4l3k/messagediff v1.2.1 // indirect
-	github.com/knqyf263/trivy v0.0.13
+	github.com/knqyf263/trivy v0.1.1
 	github.com/urfave/cli v1.20.0
 	golang.org/x/xerrors v0.0.0-20190510150013-5403a72a6aaf
 )
